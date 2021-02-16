@@ -26,9 +26,41 @@ def login(username, password):
     logCheck = cursor.fetchone()
     if logCheck != None:
         print(logCheck[0])
+        return logCheck[0]
     else:
         print("Wrong login or password!")
         logCheck = -1
+        return logCheck
+
+def addPost(userId, message, file):
+    cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) SELECT '"+str(userId)+"','"+message+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    conn.commit()
+
+def getUserPosts(userId):
+    cursor.execute("Select * FROM PPP.dbo.Messages WHERE userId='"+str(userId)+"'")
+    posts = cursor.fetchall()
+    return posts
+
+def addArticle(userId, topic, article, file):
+    cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) SELECT '"+str(userId)+"','"+topic+"', '"+article+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    conn.commit()
+
+def getArticleTopics():
+    cursor.execute("Select id, userId, topic FROM PPP.dbo.Articles")
+    articles = cursor.fetchall()
+    return articles
+
+def getArticle(id):
+    cursor.execute("Select * FROM PPP.dbo.Articles WHERE id='"+str(id)+"'")
+    article = cursor.fetchone()
+    print(article)
+    return article
 
 # register("testowy", "tester", "tester@test.com")
-# login("testowy", "tester")
+# userId = login("testowy", "tester")
+# addPost(userId, 'Testowa wiadomość aplikacji, Lorem Ipsum', 'C:/Users/pawel/Desktop/border.jpg')
+# getUserPosts(userId)
+# addArticle(userId, 'Border Collie 2', 'Testowy artykuł dotyczący pieska 2!', 'C:/Users/pawel/Desktop/border.jpg')
+# getArticleTopics()
+# getArticle(1)
+
