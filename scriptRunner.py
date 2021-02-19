@@ -18,9 +18,9 @@ def runScripts(path):
 
     return tab
 
-values = []
-values = runScripts('C:/Users/pawel/Desktop/border.jpg')
+#values = []
+#values = runScripts('C:/Users/pawel/Desktop/border.jpg')
 
-for x in values:
-    print(x[0])
-    print(x[1])
+# for x in values:
+#     print(x[0])
+#     print(x[1])
