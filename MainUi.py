@@ -1,6 +1,6 @@
 from PyQt5 import QtGui
 from scriptRunner import runScripts
-from Endpoints import mockup, getDataForText, getDataForGraph
+from Endpoints import getDataForText, getDataForGraph
 import numpy as np
 import sys
 
