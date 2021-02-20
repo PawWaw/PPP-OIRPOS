@@ -22,7 +22,7 @@ def runMobileNetV2(path):
     preTrainedModel = MobileNetV2(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None)
 
     # wczytanie z pliku obrazu
-    image = load_img('C:/Users/pawel/Desktop/border.jpg', target_size=(224, 224))
+    image = load_img(path, target_size=(224, 224))
     image = img_to_array(image)
     image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
     image = preprocess_input(image)
