@@ -30,8 +30,9 @@ def Base64ToRawPNG(pngImage):
 def index():
     if 'user' in session:
         # Pobranie danych z tabeli
-        posts,username = dbConnection.getUserPosts(session['user'])
-        return render_template('index.html', posts=posts, user=username)
+        articles = dbConnection.getArticleTopics()
+        username = dbConnection.getUserName(session['user'])
+        return render_template('index.html', articles=articles, user=username)
     else:
         # Nie ma użytkownika w sesji
         return redirect(url_for('login'))
@@ -67,29 +68,26 @@ def userAdd():
             return "<p class='error'>Nazwa użytkownika i hasło muszą być wypełnione</p>" + render_template('add.html')
         # Dodanie użytkownika do bazy danych
         if dbConnection.register(userLogin, password, email) != -1:
-            return "Dodano użytkownika do bazy danych <br>" + render_template('login.html')
+            return "Dodano użytkownika<br>" + render_template('login.html')
         else:
             return render_template('registration.html')
 
 # dodanie posta użytkownika
-@app.route('/post', methods=['GET', 'POST'])
+@app.route('/post', methods=['POST'])
 def post():
-    if request.method == 'GET':
-        return redirect(url_for('posts'))
+    if 'user' in session:
+        content = request.form['content']
+        image = None
+        if 'image' in request.files:
+            image = request.files['image']
+            if image and allowed_file(image.filename):
+                image = image.read()
+                preImg = io.BytesIO(image)
+                img = rawPngToBase64(preImg.getvalue())
+        dbConnection.addPost(session['user'], content, img)
+        return index()
     else:
-        if 'user' in session:
-            content = request.form['content']
-            image = None
-            if 'image' in request.files:
-                image = request.files['image']
-                if image and allowed_file(image.filename):
-                    image = image.read()
-                    preImg = io.BytesIO(image)
-                    img = rawPngToBase64(preImg.getvalue())
-            dbConnection.addPost(session['user'], content, img)
-            return index()
-        else:
-            return "Co ty tutaj robisz?"
+        return "Co ty tutaj robisz?"
 
 # dodanie article użytkownika
 @app.route('/article', methods=['POST'])
@@ -99,10 +97,11 @@ def article():
         content = request.form['content']
         image = None
         if 'image' in request.files:
-                if image and allowed_file(image.filename):
-                    image = request.files['image'].read()
-                    preImg = io.BytesIO(image)
-                    img = rawPngToBase64(preImg.getvalue())
+            image = request.files['image']
+            if image and allowed_file(image.filename):
+                image = request.files['image'].read()
+                preImg = io.BytesIO(image)
+                img = rawPngToBase64(preImg.getvalue())
         dbConnection.addArticle(session['user'], title, content, img)
         return index()
     else:
@@ -124,8 +123,10 @@ def userPosts():
 def aPost(post_id):
     if 'user' in session:
         # Pobranie danych z tabeli
-        post, username = dbConnection.getPost(session['user'])
-        return render_template('posts.html', posts=post, userName=username)
+        post, username = dbConnection.getPost(post_id)
+        if post == None:
+            abort(404)
+        return render_template('post.html', post=post, userName=username)
     else:
         # Nie ma użytkownika w sesji
         return redirect(url_for('login'))
@@ -151,7 +152,7 @@ def imgArticle(article_id):
     binaryImg = article.file
     return Response(Base64ToRawPNG(binaryImg), mimetype='image/png')
 
-#obrazek dla postu
+#obrazek dla posta
 @app.route('/img/post/<int:post_id>', methods=['GET'])
 def imgPost(post_id):
     if 'user' in session:

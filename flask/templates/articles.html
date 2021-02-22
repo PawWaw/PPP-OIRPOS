@@ -1,0 +1,21 @@
+<html>
+    <head>
+    </head>
+<body>
+    <div class="main">
+        <div class="content">
+            <table>
+                <thead>
+                   <td>Title</td>
+                </thead> 
+                {% for article in articles %}
+                   <tr>
+                    <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
+                   </tr>
+                {% endfor %}
+             </table>
+        </div>
+    </div>
+    <a href="/">Powrót</a>
+</body>
+</html>

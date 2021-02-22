@@ -1,0 +1,19 @@
+<html>
+    <head>
+    </head>
+<body>
+    <h1>Post użytkownika - {{userName}}</h1>
+    <table>
+        <thead>
+           <td>Treść postu</td>
+           <td>Obrazek</td>
+        </thead> 
+           <tr>
+              <td>{{post.message}}</td>
+              <td><img src="{{post.file}}"></td>
+           </tr>
+     </table>
+     <a href="/posts">Posty</a>
+     <a href="/">Strona Główna</a>
+</body>
+</html>
