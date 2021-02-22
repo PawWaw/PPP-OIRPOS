@@ -36,7 +36,8 @@ def login():
         if 'user' in session:
             return redirect(url_for('index'))
         else:
-            return render_template('login.html')
+            articles = dbConnection.getArticleTopics()
+            return render_template('login.html', articles=articles)
     else:
         login = request.form['login']
         password = request.form['password']
@@ -65,7 +66,7 @@ def userAdd():
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     if request.method == 'GET':
-        return render_template('post.html')
+        return redirect(url_for('posts'))
     else:
         if 'user' in session:
             content = request.form['content']
@@ -76,14 +77,40 @@ def post():
             return index()
         else:
             return "Co ty tutaj robisz?"
-    
-# użytkownicy
-@app.route('/users', methods=['GET'])
-def users():
-    if 'isAdmin' in session:
-        if session['isAdmin'] == 1:
-            return render_template('users.html', users=users)
-    return "Co ty tutaj robisz? <br> <a href=/>Powrót</a>"
+
+# dodanie article użytkownika
+@app.route('/article', methods=['GET', 'POST'])
+def article():
+    if request.method == 'GET':
+        return redirect(url_for('articles'))
+    else:
+        if 'user' in session:
+            title = request.form['title']
+            content = request.form['content']
+            image = None
+            if 'image' in request.files:
+                image = request.files['image']
+            dbConnection.addArticle(session['user'], title, content, image)
+            return index()
+        else:
+            return "Co ty tutaj robisz?"
+
+#wszystkie posty użytkownika
+@app.route('/posts', methods=['GET'])
+def userPosts():
+    if 'user' in session:
+        # Pobranie danych z tabeli
+        posts = dbConnection.getUserPosts(session['user'])
+        return render_template('posts.html', posts=posts)
+    else:
+        # Nie ma użytkownika w sesji
+        return redirect(url_for('login'))
+
+#wszystkie posty użytkownika
+@app.route('/articles', methods=['GET'])
+def allArticles():
+    articles = dbConnection.getArticleTopics()
+    return render_template('articles.html', articles=articles)
 
 # jeden użytkownik
 @app.route('/user/<int+:get_id>', methods=['GET'])
