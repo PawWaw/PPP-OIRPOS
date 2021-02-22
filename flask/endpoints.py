@@ -12,6 +12,10 @@ import dbConnection
 app = Flask("Dogopedia", template_folder='flask/templates')
 sess = Session()
 
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #Widok główny
 @app.route('/', methods=['GET', 'POST'])
@@ -21,7 +25,7 @@ def index():
         posts = dbConnection.getUserPosts(session['user'])
         return render_template('index.html', posts = posts, user=session['user'])
     else:
-        print("nie ma user'a w sesji")
+        #Nie ma użytkownika w sesji
         return redirect(url_for('login'))
 
 #widok logowanie
@@ -37,7 +41,7 @@ def login():
         password = request.form['password']
         id = login(login, password)
         if id != -1:
-            print("jest uzytkownik")
+            #Poprawny użytkownik
             session['user'] = id
         return redirect(url_for('index'))
 
@@ -49,9 +53,11 @@ def userAdd():
     else:
         userLogin = request.form['login']
         password = request.form['password']
+        email = request.form['email']
+        if userLogin == '' or password == '':
+            return "<p class='error'>Nazwa użytkownika i hasło muszą być wypełnione</p>" + render_template('add.html')
         # Dodanie użytkownika do bazy danych
-        
-        
+        dbConnection.register(userLogin, password, email)
         return "Dodano użytkownika do bazy danych <br>" + render_template('login.html')
 
 #dodanie ksiazki

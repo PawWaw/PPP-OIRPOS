@@ -1,8 +1,8 @@
 import pyodbc
 import hashlib, uuid
 
-conn = pyodbc.connect('Driver={SQL Server};'
-                      'Server=DESKTOP-3DIB104;'
+conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
+                      'Server=blackblood-pc;'
                       'Database=PPP;'
                       'Trusted_Connection=yes;')
 
