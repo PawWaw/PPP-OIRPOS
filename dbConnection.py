@@ -44,9 +44,8 @@ def addPost(userId, message, file):
 def getUserPosts(userId):
     cursor.execute("Select * FROM PPP.dbo.Messages WHERE userId='"+str(userId)+"'")
     posts = cursor.fetchall()
-    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")
-    username = cursor.fetchone()
-    return posts, username[0]
+    username = getUserName(userId)
+    return posts, username
 
 def addArticle(userId, topic, article, file):
     cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) SELECT '"+str(userId)+"','"+topic+"', '"+article+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
@@ -60,14 +59,17 @@ def getArticleTopics():
 def getArticle(id):
     cursor.execute("Select * FROM PPP.dbo.Articles WHERE id='"+str(id)+"'")
     article = cursor.fetchone()
-    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(article[1])+"'")
-    username = cursor.fetchone()
-    return article, username[0]
+    username = getUserName(article.userId)
+    return article, username
 
+def getUserName(userId):
+    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")
+    username = cursor.fetchone()
+    return username[0]
 # register("testowy", "tester", "tester@test.com")
-userId = login("testowy", "tester")
+#userId = login("testowy", "tester")
 # addPost(userId, 'Testowa wiadomość aplikacji, Lorem Ipsum', 'C:/Users/pawel/Desktop/border.jpg')
-getUserPosts(userId)
+#getUserPosts(userId)
 # addArticle(userId, 'Border Collie 2', 'Testowy artykuł dotyczący pieska 2!', 'C:/Users/pawel/Desktop/border.jpg')
 # getArticleTopics()
 # getArticle(1)

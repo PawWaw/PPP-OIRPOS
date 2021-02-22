@@ -1,4 +1,3 @@
-import dbConnection
 from flask_session import Session
 from flask import render_template, request, redirect, url_for, flash, session
 from flask import Flask
@@ -8,6 +7,7 @@ import sys
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
+import dbConnection
 # Dołączanie modułu flask
 # Tworzenie aplikacji - w tym momencie rootem jest ścieżka Dogopedia więc trzeba zrobić flask/templates
 app = Flask("Dogopedia", template_folder='flask/templates')
@@ -23,8 +23,8 @@ def allowed_file(filename):
 def index():
     if 'user' in session:
         # Pobranie danych z tabeli
-        posts = dbConnection.getUserPosts(session['user'])
-        return render_template('index.html', posts=posts, user=session['user'])
+        posts,username = dbConnection.getUserPosts(session['user'])
+        return render_template('index.html', posts=posts, user=username)
     else:
         # Nie ma użytkownika w sesji
         return redirect(url_for('login'))
@@ -41,7 +41,7 @@ def login():
     else:
         login = request.form['login']
         password = request.form['password']
-        id = login(login, password)
+        id = dbConnection.login(login, password)
         if id != -1:
             # Poprawny użytkownik
             session['user'] = id
@@ -51,7 +51,7 @@ def login():
 @app.route('/user/add', methods=['GET', 'POST'])
 def userAdd():
     if request.method == 'GET':
-        return render_template('add.html')
+        return render_template('registration.html')
     else:
         userLogin = request.form['login']
         password = request.form['password']
@@ -79,48 +79,41 @@ def post():
             return "Co ty tutaj robisz?"
 
 # dodanie article użytkownika
-@app.route('/article', methods=['GET', 'POST'])
+@app.route('/article', methods=['POST'])
 def article():
-    if request.method == 'GET':
-        return redirect(url_for('articles'))
+    if 'user' in session:
+        title = request.form['title']
+        content = request.form['content']
+        image = None
+        if 'image' in request.files:
+            image = request.files['image']
+        dbConnection.addArticle(session['user'], title, content, image)
+        return index()
     else:
-        if 'user' in session:
-            title = request.form['title']
-            content = request.form['content']
-            image = None
-            if 'image' in request.files:
-                image = request.files['image']
-            dbConnection.addArticle(session['user'], title, content, image)
-            return index()
-        else:
-            return "Co ty tutaj robisz?"
+        return "Co ty tutaj robisz?"
 
 #wszystkie posty użytkownika
 @app.route('/posts', methods=['GET'])
 def userPosts():
     if 'user' in session:
         # Pobranie danych z tabeli
-        posts = dbConnection.getUserPosts(session['user'])
-        return render_template('posts.html', posts=posts)
+        posts,username = dbConnection.getUserPosts(session['user'])
+        return render_template('posts.html', posts=posts, userName=username)
     else:
         # Nie ma użytkownika w sesji
         return redirect(url_for('login'))
 
-#wszystkie posty użytkownika
+#wszystkie artykuły użytkownika
 @app.route('/articles', methods=['GET'])
 def allArticles():
     articles = dbConnection.getArticleTopics()
     return render_template('articles.html', articles=articles)
 
-# jeden użytkownik
-@app.route('/user/<int+:get_id>', methods=['GET'])
-def get_user_by_id(get_id):
-    return "Co ty tutaj robisz? <br> <a href=/>Powrót</a>"
-
-
-@app.route('/user/<get_name>', methods=['GET'])
-def get_user_by_name(get_name):
-    return "Co ty tutaj robisz? <br> <a href=/>Powrót</a>"
+#Konkretny artykuł
+@app.route('/article/<int:get_id>', methods=['GET'])
+def getPost(article_id):
+    article = dbConnection.getArticle(article_id)
+    return render_template('article.html', article = article)
 
 # wylogowanie
 @app.route('/logout', methods=['GET'])
