@@ -140,7 +140,7 @@ def allArticles():
 @app.route('/article/<int:article_id>', methods=['GET'])
 def getArticle(article_id):
     article,username = dbConnection.getArticle(article_id)
-    return render_template('article.html', article = article, author = username, img = img)
+    return render_template('article.html', article = article, author = username)
 
 #obrazek dla artykułu
 @app.route('/img/article/<int:article_id>', methods=['GET'])
