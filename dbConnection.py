@@ -1,8 +1,8 @@
 import pyodbc
 import hashlib, uuid
 
-conn = pyodbc.connect('Driver={SQL Server};'
-                      'Server=DESKTOP-3DIB104;'
+#conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
+#                      'Server=blackblood-pc;'
                       'Database=PPP;'
                       'Trusted_Connection=yes;')
 
@@ -38,18 +38,16 @@ def login(username, password):
         return logCheck
 
 def addPost(userId, message, file):
-    cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) SELECT '"+str(userId)+"','"+message+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) VALUES('"+str(userId)+"','"+message+"','"+file+"')")
     conn.commit()
 
 def getUserPosts(userId):
     cursor.execute("Select * FROM PPP.dbo.Messages WHERE userId='"+str(userId)+"'")
-    posts = cursor.fetchall()
-    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")
-    username = cursor.fetchone()
-    return posts, username[0]
+    posts = cursor.fetchall()    username = getUserName(userId)
+    return posts, username
 
 def addArticle(userId, topic, article, file):
-    cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) SELECT '"+str(userId)+"','"+topic+"', '"+article+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) VALUES('"+str(userId)+"','"+topic+"', '"+article+"','"+file+"')")
     conn.commit()
 
 def getArticleTopics():
@@ -60,14 +58,25 @@ def getArticleTopics():
 def getArticle(id):
     cursor.execute("Select * FROM PPP.dbo.Articles WHERE id='"+str(id)+"'")
     article = cursor.fetchone()
-    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(article[1])+"'")
-    username = cursor.fetchone()
-    return article, username[0]
+    username = getUserName(article.userId)
+    return article, username
 
+def getPost(id):
+    cursor.execute("Select * FROM PPP.dbo.Messages WHERE id='"+str(id)+"'")
+    post = cursor.fetchone()
+    username = None
+    if post != None:
+        username = getUserName(post.userId)
+    return post, username
+
+def getUserName(userId):
+    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")
+    username = cursor.fetchone()
+    return username[0]
 # register("testowy", "tester", "tester@test.com")
-userId = login("testowy", "tester")
+#userId = login("testowy", "tester")
 # addPost(userId, 'Testowa wiadomość aplikacji, Lorem Ipsum', 'C:/Users/pawel/Desktop/border.jpg')
-getUserPosts(userId)
+#getUserPosts(userId)
 # addArticle(userId, 'Border Collie 2', 'Testowy artykuł dotyczący pieska 2!', 'C:/Users/pawel/Desktop/border.jpg')
 # getArticleTopics()
 # getArticle(1)

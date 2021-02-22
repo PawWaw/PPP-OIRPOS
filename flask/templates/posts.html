@@ -1,0 +1,21 @@
+<html>
+    <head>
+    </head>
+<body>
+    <h1>Posty użytkownika - {{userName}}</h1>
+    <h1>
+        Posts
+    </h1>
+    <table>
+        <thead>
+           <td>Treść postu</td>
+        </thead> 
+        {% for post in posts %}
+           <tr>
+              <td><a href="/post/{{post.id}}">{{post.message}}</a></td>
+           </tr>
+        {% endfor %}
+     </table>
+    <a href="/">Strona Główna</a>
+</body>
+</html>

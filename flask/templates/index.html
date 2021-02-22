@@ -1,0 +1,39 @@
+<html>
+    <head>
+    </head>
+<body>
+    <h1>Użytkownik - {{user}}. <a href="/posts">Twoje posty</a></h1>
+    <h1>
+        Artykuły
+    </h1>
+    <table>
+        <thead>
+           <td>Artykuł</td>
+        </thead> 
+        {% for article in articles %}
+           <tr>
+              <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
+           </tr>
+        {% endfor %}
+     </table>
+    <h1>
+        Dodaj Post
+    </h1>
+    <form method=post action="/post" enctype=multipart/form-data>
+        <input type=text name=content placeholder="Napisz coś o swoim psie"/>
+        Obrazek: <input type=file name=image accept="image/png" />
+        <input type=submit />
+    </form>
+    <h1>
+        Napisz Artykuł
+    </h1>
+    <form method=post action="/article" enctype=multipart/form-data>
+        <input type=text name=title placeholder="Rasa psa" />
+        <textarea name=content placeholder="Napisz coś o rasie psa" rows="4" cols="50"></textarea>
+        Obrazek przedstawiający rasę psa: <input type=file name=image accept="image/png" />
+        <input type=submit />
+    </form>
+    <a href="/guess">Guesserr</a>
+    <a href=/logout>Logout</a>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<html>
+    <head>
+    </head>
+<body>
+    <h1>
+        Wpisz dane logowania
+    </h1>
+    <form method=post action="/login">
+        Login: <input type=text name="login">
+        Password: <input type=password name="password">
+        <input type=submit>
+    </form>
+    <p>Nie masz konta? Możesz założyć <a href="/user/add">tutaj</a></p>
+    <div class="main">
+        <div class="content">
+            <table>
+                <thead>
+                   <td>Title</td>
+                </thead> 
+                {% for article in articles %}
+                   <tr>
+                    <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
+                   </tr>
+                {% endfor %}
+             </table>
+        </div>
+    </div>
+</body>
+</html>
