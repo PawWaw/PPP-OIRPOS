@@ -1,8 +1,8 @@
 import pyodbc
 import hashlib, uuid
 
-#conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
-#                      'Server=blackblood-pc;'
+conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
+                      'Server=blackblood-pc;'
                       'Database=PPP;'
                       'Trusted_Connection=yes;')
 
@@ -43,7 +43,8 @@ def addPost(userId, message, file):
 
 def getUserPosts(userId):
     cursor.execute("Select * FROM PPP.dbo.Messages WHERE userId='"+str(userId)+"'")
-    posts = cursor.fetchall()    username = getUserName(userId)
+    posts = cursor.fetchall()    
+    username = getUserName(userId)
     return posts, username
 
 def addArticle(userId, topic, article, file):
