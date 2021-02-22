@@ -15,8 +15,13 @@ def hashing(pswd):
 
 def register(username, password, mail):
     hashed, salt = hashing(password)
-    cursor.execute("INSERT INTO PPP.dbo.Users(username, password, salt, email) values ('"+username+"','"+hashed+"','"+salt+"','"+mail+"')")
-    conn.commit()
+    cursor.execute("SELECT username FROM PPP.dbo.Users WHERE username='"+username+"'")
+    if cursor.fetchone() != None:
+        print("User with that login already exists!")
+        return -1
+    else:
+        cursor.execute("INSERT INTO PPP.dbo.Users(username, password, salt, email) values ('"+username+"','"+hashed+"','"+salt+"','"+mail+"')")
+        conn.commit()
 
 def login(username, password):
     cursor.execute("SELECT salt FROM PPP.dbo.Users WHERE username='"+username+"'")
@@ -39,7 +44,9 @@ def addPost(userId, message, file):
 def getUserPosts(userId):
     cursor.execute("Select * FROM PPP.dbo.Messages WHERE userId='"+str(userId)+"'")
     posts = cursor.fetchall()
-    return posts
+    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")
+    username = cursor.fetchone()
+    return posts, username[0]
 
 def addArticle(userId, topic, article, file):
     cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) SELECT '"+str(userId)+"','"+topic+"', '"+article+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
@@ -53,13 +60,14 @@ def getArticleTopics():
 def getArticle(id):
     cursor.execute("Select * FROM PPP.dbo.Articles WHERE id='"+str(id)+"'")
     article = cursor.fetchone()
-    print(article)
-    return article
+    cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(article[1])+"'")
+    username = cursor.fetchone()
+    return article, username[0]
 
 # register("testowy", "tester", "tester@test.com")
-# userId = login("testowy", "tester")
+userId = login("testowy", "tester")
 # addPost(userId, 'Testowa wiadomość aplikacji, Lorem Ipsum', 'C:/Users/pawel/Desktop/border.jpg')
-# getUserPosts(userId)
+getUserPosts(userId)
 # addArticle(userId, 'Border Collie 2', 'Testowy artykuł dotyczący pieska 2!', 'C:/Users/pawel/Desktop/border.jpg')
 # getArticleTopics()
 # getArticle(1)
