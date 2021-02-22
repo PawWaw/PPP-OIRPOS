@@ -3,6 +3,8 @@ import base64
 from flask_session import Session
 from flask import render_template, request, redirect, url_for, flash, session, Response, abort
 from flask import Flask
+from werkzeug.utils import secure_filename
+from matplotlib import pyplot as plt
 import os
 import sys
 # Użycie parentdir
@@ -10,6 +12,8 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 import dbConnection
+from scriptRunner import runScripts
+from UIMethods import getDataForGraph, getDataForText
 # Dołączanie modułu flask
 # Tworzenie aplikacji - w tym momencie rootem jest ścieżka Dogopedia więc trzeba zrobić flask/templates
 app = Flask("Dogopedia", template_folder='flask/templates', static_folder="flask/static")
@@ -26,7 +30,7 @@ def rawPngToBase64(binaryFile):
 def Base64ToRawPNG(pngImage):
     return base64.decodebytes(pngImage.split('base64,')[1].encode('utf8'))
 # Widok główny
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
     if 'user' in session:
         # Pobranie danych z tabeli
@@ -164,7 +168,30 @@ def imgPost(post_id):
     else:
         abort(404)
 
-
+#Obrazek wygenerowany przez sieć
+@app.route('/guess', methods=['GET','POST'])
+def guesserr():
+    if request.method == 'POST':
+        image = None
+        if 'image' in request.files:
+            image = request.files['image']
+            if image and allowed_file(image.filename):
+                image = request.files['image']
+                diractory = os.path.join(app.static_folder, secure_filename(image.filename))
+                image.save(diractory)
+                tab = runScripts(diractory)
+                os.remove(diractory)
+                networkInfo = getDataForGraph(tab)
+                title = getDataForText(tab)
+                fig = plt.figure(figsize=(16, 9))
+                plt.bar(networkInfo[0],networkInfo[1], color='orange', align='center')
+                plt.title(title)
+                img = io.BytesIO()
+                fig.savefig(img,bbox_inches='tight',dpi=100, aspect='auto')
+                return Response(img.getvalue(), mimetype='image/png')
+        return "POST"
+    else:
+        return render_template('guess.html')
 # wylogowanie
 @app.route('/logout', methods=['GET'])
 def logout():
