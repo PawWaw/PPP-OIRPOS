@@ -38,7 +38,7 @@ def login(username, password):
         return logCheck
 
 def addPost(userId, message, file):
-    cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) SELECT '"+str(userId)+"','"+message+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) VALUES('"+str(userId)+"','"+message+"','"+file+"')")
     conn.commit()
 
 def getUserPosts(userId):
@@ -48,7 +48,7 @@ def getUserPosts(userId):
     return posts, username
 
 def addArticle(userId, topic, article, file):
-    cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) SELECT '"+str(userId)+"','"+topic+"', '"+article+"', BULKCOLUMN FROM Openrowset(Bulk '"+file+"', Single_Blob) as Image")
+    cursor.execute("INSERT INTO PPP.dbo.Articles(userId, topic, informations, [file]) VALUES('"+str(userId)+"','"+topic+"', '"+article+"','"+file+"')")
     conn.commit()
 
 def getArticleTopics():
@@ -61,6 +61,14 @@ def getArticle(id):
     article = cursor.fetchone()
     username = getUserName(article.userId)
     return article, username
+
+def getPost(id):
+    cursor.execute("Select * FROM PPP.dbo.Messages WHERE id='"+str(id)+"'")
+    post = cursor.fetchone()
+    username = None
+    if post != None:
+        username = getUserName(post.userId)
+    return post, username
 
 def getUserName(userId):
     cursor.execute("Select username FROM PPP.dbo.Users WHERE id='"+str(userId)+"'")

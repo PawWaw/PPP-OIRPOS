@@ -1,5 +1,7 @@
+import io
+import base64
 from flask_session import Session
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, Response, abort
 from flask import Flask
 import os
 import sys
@@ -10,14 +12,19 @@ sys.path.append(parentdir)
 import dbConnection
 # Dołączanie modułu flask
 # Tworzenie aplikacji - w tym momencie rootem jest ścieżka Dogopedia więc trzeba zrobić flask/templates
-app = Flask("Dogopedia", template_folder='flask/templates')
+app = Flask("Dogopedia", template_folder='flask/templates', static_folder="flask/static")
 sess = Session()
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['png'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def rawPngToBase64(binaryFile):
+    return "data:image/png;base64," + base64.b64encode(binaryFile).decode('utf8')
+
+def Base64ToRawPNG(pngImage):
+    return base64.decodebytes(pngImage.split('base64,')[1].encode('utf8'))
 # Widok główny
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -59,8 +66,10 @@ def userAdd():
         if userLogin == '' or password == '':
             return "<p class='error'>Nazwa użytkownika i hasło muszą być wypełnione</p>" + render_template('add.html')
         # Dodanie użytkownika do bazy danych
-        dbConnection.register(userLogin, password, email)
-        return "Dodano użytkownika do bazy danych <br>" + render_template('login.html')
+        if dbConnection.register(userLogin, password, email) != -1:
+            return "Dodano użytkownika do bazy danych <br>" + render_template('login.html')
+        else:
+            return render_template('registration.html')
 
 # dodanie posta użytkownika
 @app.route('/post', methods=['GET', 'POST'])
@@ -73,7 +82,11 @@ def post():
             image = None
             if 'image' in request.files:
                 image = request.files['image']
-            dbConnection.addPost(session['user'], content, image)
+                if image and allowed_file(image.filename):
+                    image = image.read()
+                    preImg = io.BytesIO(image)
+                    img = rawPngToBase64(preImg.getvalue())
+            dbConnection.addPost(session['user'], content, img)
             return index()
         else:
             return "Co ty tutaj robisz?"
@@ -86,8 +99,11 @@ def article():
         content = request.form['content']
         image = None
         if 'image' in request.files:
-            image = request.files['image']
-        dbConnection.addArticle(session['user'], title, content, image)
+                if image and allowed_file(image.filename):
+                    image = request.files['image'].read()
+                    preImg = io.BytesIO(image)
+                    img = rawPngToBase64(preImg.getvalue())
+        dbConnection.addArticle(session['user'], title, content, img)
         return index()
     else:
         return "Co ty tutaj robisz?"
@@ -97,8 +113,19 @@ def article():
 def userPosts():
     if 'user' in session:
         # Pobranie danych z tabeli
-        posts,username = dbConnection.getUserPosts(session['user'])
+        posts, username = dbConnection.getUserPosts(session['user'])
         return render_template('posts.html', posts=posts, userName=username)
+    else:
+        # Nie ma użytkownika w sesji
+        return redirect(url_for('login'))
+
+#Konkretny post
+@app.route('/post/<int:post_id>', methods=['GET'])
+def aPost(post_id):
+    if 'user' in session:
+        # Pobranie danych z tabeli
+        post, username = dbConnection.getPost(session['user'])
+        return render_template('posts.html', posts=post, userName=username)
     else:
         # Nie ma użytkownika w sesji
         return redirect(url_for('login'))
@@ -106,21 +133,42 @@ def userPosts():
 #wszystkie artykuły użytkownika
 @app.route('/articles', methods=['GET'])
 def allArticles():
-    articles = dbConnection.getArticleTopics()
-    return render_template('articles.html', articles=articles)
+    articleTopics = dbConnection.getArticleTopics()
+    return render_template('articles.html', articles=articleTopics)
 
 #Konkretny artykuł
-@app.route('/article/<int:get_id>', methods=['GET'])
-def getPost(article_id):
-    article = dbConnection.getArticle(article_id)
-    return render_template('article.html', article = article)
+@app.route('/article/<int:article_id>', methods=['GET'])
+def getArticle(article_id):
+    article,username = dbConnection.getArticle(article_id)
+    return render_template('article.html', article = article, author = username, img = img)
+
+#obrazek dla artykułu
+@app.route('/img/article/<int:article_id>', methods=['GET'])
+def imgArticle(article_id):
+    article, username= dbConnection.getArticle(article_id)
+    if article == None:
+        abort(404)
+    binaryImg = article.file
+    return Response(Base64ToRawPNG(binaryImg), mimetype='image/png')
+
+#obrazek dla postu
+@app.route('/img/post/<int:post_id>', methods=['GET'])
+def imgPost(post_id):
+    if 'user' in session:
+        post, username= dbConnection.getPost(post_id)
+        if post == None:
+            abort(404)
+        binaryImg = post.file
+        return Response(Base64ToRawPNG(binaryImg), mimetype='image/png')
+    else:
+        abort(404)
+
 
 # wylogowanie
 @app.route('/logout', methods=['GET'])
 def logout():
     if 'user' in session:
         session.pop('user')
-        session.pop('isAdmin')
     return redirect(url_for('login'))
 
 # Uruchomienie applikacji w trybie debug
