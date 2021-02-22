@@ -29,6 +29,11 @@ def rawPngToBase64(binaryFile):
 
 def Base64ToRawPNG(pngImage):
     return base64.decodebytes(pngImage.split('base64,')[1].encode('utf8'))
+
+#404 error
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html', img="/static/404-najman.jpg"), 404   
 # Widok główny
 @app.route('/', methods=['GET'])
 def index():
