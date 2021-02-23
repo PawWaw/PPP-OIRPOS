@@ -171,27 +171,30 @@ def imgPost(post_id):
 #Obrazek wygenerowany przez sieć
 @app.route('/guess', methods=['GET','POST'])
 def guesserr():
-    if request.method == 'POST':
-        image = None
-        if 'image' in request.files:
-            image = request.files['image']
-            if image and allowed_file(image.filename):
+    if 'user' in session:
+        if request.method == 'POST':
+            image = None
+            if 'image' in request.files:
                 image = request.files['image']
-                diractory = os.path.join(app.static_folder, secure_filename(image.filename))
-                image.save(diractory)
-                tab = runScripts(diractory)
-                os.remove(diractory)
-                networkInfo = getDataForGraph(tab)
-                title = getDataForText(tab)
-                fig = plt.figure(figsize=(16, 9))
-                plt.bar(networkInfo[0],networkInfo[1], color='orange', align='center')
-                plt.title(title)
-                img = io.BytesIO()
-                fig.savefig(img,bbox_inches='tight',dpi=100, aspect='auto')
-                return Response(img.getvalue(), mimetype='image/png')
-        return "POST"
+                if image and allowed_file(image.filename):
+                    image = request.files['image']
+                    diractory = os.path.join(app.static_folder, secure_filename(image.filename))
+                    image.save(diractory)
+                    tab = runScripts(diractory)
+                    os.remove(diractory)
+                    networkInfo = getDataForGraph(tab)
+                    title = getDataForText(tab)
+                    fig = plt.figure(figsize=(16, 9))
+                    plt.bar(networkInfo[0],networkInfo[1], color='orange', align='center')
+                    plt.title(title)
+                    img = io.BytesIO()
+                    fig.savefig(img,bbox_inches='tight',dpi=100, aspect='auto')
+                    return Response(img.getvalue(), mimetype='image/png')
+            return render_template('guess.html', error=True)
+        else:
+            return render_template('guess.html', error=False)
     else:
-        return render_template('guess.html')
+        abort(404)
 # wylogowanie
 @app.route('/logout', methods=['GET'])
 def logout():
