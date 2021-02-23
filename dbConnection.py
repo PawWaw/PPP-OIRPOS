@@ -26,16 +26,18 @@ def register(username, password, mail):
 def login(username, password):
     cursor.execute("SELECT salt FROM PPP.dbo.Users WHERE username='"+username+"'")
     salt = cursor.fetchone()
-    hashed = hashlib.sha512(str(password).encode('utf-8') + str(salt[0]).encode('utf-8')).hexdigest()
-    cursor.execute("SELECT * FROM PPP.dbo.Users WHERE username='"+username+"' AND password='"+hashed+"'")
-    logCheck = cursor.fetchone()
-    if logCheck != None:
-        print(logCheck[0])
-        return logCheck[0]
-    else:
-        print("Wrong login or password!")
-        logCheck = -1
-        return logCheck
+    if salt is not None:
+        hashed = hashlib.sha512(str(password).encode('utf-8') + str(salt[0]).encode('utf-8')).hexdigest()
+        cursor.execute("SELECT * FROM PPP.dbo.Users WHERE username='"+username+"' AND password='"+hashed+"'")
+        logCheck = cursor.fetchone()
+        if logCheck != None:
+            print(logCheck[0])
+            return logCheck[0]
+        else:
+            print("Wrong login or password!")
+            logCheck = -1
+            return logCheck
+    return -1
 
 def addPost(userId, message, file):
     cursor.execute("INSERT INTO PPP.dbo.Messages(userId, message, [file]) VALUES('"+str(userId)+"','"+message+"','"+file+"')")

@@ -1,26 +1,37 @@
 <html>
-    <head>
-    </head>
+
+<head>
+</head>
+
 <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     <h1>Użytkownik - {{user}}. <a href="/posts">Twoje posty</a></h1>
     <h1>
         Artykuły
     </h1>
     <table>
         <thead>
-           <td>Artykuł</td>
-        </thead> 
+            <td>Artykuł</td>
+        </thead>
         {% for article in articles %}
-           <tr>
-              <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
-           </tr>
+        <tr>
+            <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
+        </tr>
         {% endfor %}
-     </table>
+    </table>
     <h1>
         Dodaj Post
     </h1>
     <form method=post action="/post" enctype=multipart/form-data>
-        <input type=text name=content placeholder="Napisz coś o swoim psie"/>
+        <input type=text name=content placeholder="Napisz coś o swoim psie" />
         Obrazek: <input type=file name=image accept="image/png" />
         <input type=submit />
     </form>
@@ -36,4 +47,5 @@
     <a href="/guess">Guesserr</a>
     <a href=/logout>Logout</a>
 </body>
+
 </html>

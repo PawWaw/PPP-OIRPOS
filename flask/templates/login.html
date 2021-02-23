@@ -1,7 +1,18 @@
 <html>
-    <head>
-    </head>
+
+<head>
+</head>
+
 <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     <h1>
         Wpisz dane logowania
     </h1>
@@ -15,15 +26,16 @@
         <div class="content">
             <table>
                 <thead>
-                   <td>Title</td>
-                </thead> 
+                    <td>Title</td>
+                </thead>
                 {% for article in articles %}
-                   <tr>
+                <tr>
                     <td><a href="/article/{{article.id}}">{{article.topic}}</a></td>
-                   </tr>
+                </tr>
                 {% endfor %}
-             </table>
+            </table>
         </div>
     </div>
 </body>
+
 </html>

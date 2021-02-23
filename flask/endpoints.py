@@ -10,7 +10,7 @@ import sys
 # Użycie parentdir
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
+sys.path.append(parentdir) 
 import dbConnection
 from scriptRunner import runScripts
 from UIMethods import getDataForGraph, getDataForText
@@ -56,12 +56,17 @@ def login():
             articles = dbConnection.getArticleTopics()
             return render_template('login.html', articles=articles)
     else:
-        login = request.form['login']
+        userLogin = request.form['login']
         password = request.form['password']
-        id = dbConnection.login(login, password)
+        if userLogin == '' or password == '':
+            return "<p class='error'>Nazwa użytkownika i hasło muszą być wypełnione</p>" + render_template('login.html')
+        id = dbConnection.login(userLogin, password)
         if id != -1:
             # Poprawny użytkownik
             session['user'] = id
+            flash("Zostałeś pomyślnie zalogowany!")
+        else:
+            flash("Wpisałeś złe hasło lub nazwę użytkownika")
         return redirect(url_for('index'))
 
 # dodanie użytkownika
@@ -94,6 +99,7 @@ def post():
                 preImg = io.BytesIO(image)
                 img = rawPngToBase64(preImg.getvalue())
         dbConnection.addPost(session['user'], content, img)
+        flash("Dodano posta z sukcesem!")
         return index()
     else:
         return "Co ty tutaj robisz?"
@@ -205,6 +211,7 @@ def guesserr():
 def logout():
     if 'user' in session:
         session.pop('user')
+        flash("Zostałeś pomyślnie wylogowany!")
     return redirect(url_for('login'))
 
 # Uruchomienie applikacji w trybie debug

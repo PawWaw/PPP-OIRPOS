@@ -1,19 +1,24 @@
 <html>
-    <head>
-    </head>
+
+<head>
+</head>
+
 <body>
-    <h1>Artykuł "{{article.topic}}" użytkownika - {{author}}</h1>
-    <table>
-        <thead>
-           <td>Treść artykułu</td>
-           <td>Obrazek</td>
-        </thead> 
-           <tr>
-              <td>{{article.informations}}</td>
-              <td><img src="{{article.file}}"></td>
-           </tr>
-     </table>
-     <a href="/articles">Artykuły</a>
-     <a href="/">Strona Główna</a>
+   <div class="main">
+      <div class="head">
+         <h1>Artykuł "{{article.topic}}" użytkownika - {{author}}</h1>
+      </div>
+      <div class="content">
+         <div class="image">
+            <img src="{{article.file}}" height="200px" width="auto">
+         </div>
+         <p class="text">{{article.informations}}</p>
+      </div>
+      <div class="footer">
+         <a href="/articles">Artykuły</a>
+         <a href="/">Strona Główna</a>
+      </div>
+   </div>
 </body>
+
 </html>
