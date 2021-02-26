@@ -66,7 +66,7 @@ Some endpoints used in application:
   </tr>
   <tr>
     <td>GET</td>
-    <td>/post/<int:post_id></td>
+    <td>/post/int:post_id</td>
     <td>-</td>
     <td><b>Only for logged in users</b> returns user's post and username[string] if post exists otherwise returns 404</td>
   </tr>
@@ -78,19 +78,19 @@ Some endpoints used in application:
   </tr>
   <tr>
     <td>GET</td>
-    <td>/article/<int:post_id></td>
+    <td>/article/int:post_id</td>
     <td>-</td>
     <td>returns article and author[string] if article exists otherwise returns 404</td>
   </tr>
   <tr>
     <td>GET</td>
-    <td>/img/post/<int:article_id></td>
+    <td>/img/post/int:article_id</td>
     <td>-</td>
     <td><b>Only for logged in users</b> returns post's image if post doesn't exist return 404</td>
   </tr>
   <tr>
     <td>GET</td>
-    <td>/img/article/<int:article_id></td>
+    <td>/img/article/int:article_id</td>
     <td>-</td>
     <td>image used in article if article doesn't exist return 404</td>
   </tr>
@@ -108,7 +108,7 @@ Some endpoints used in application:
   </tr>
 </table>
 
-## Usage of application:
+## Usage of application
 For unregister user you can only see articles and read them.
 For logged in users you can add a post (only for yourself), create an article and use guesserr.
 In guesserr you just put a PNG image and wait for response from server.
