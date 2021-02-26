@@ -107,6 +107,7 @@ Some endpoints used in application:
     <td><b>Only for logged in users</b> image/png which contains graph and average recognition accuracy</td>
   </tr>
 </table>
+
 ## Usage of application:
 For unregister user you can only see articles and read them.
 For logged in users you can add a post (only for yourself), create an article and use guesserr.
